@@ -9,8 +9,7 @@ from dao.Troca import create as dao_create_troca, list_all as dao_list_trocas, f
 traducao_bp = Blueprint("traducao_bp", __name__)
 troca_bp = Blueprint("troca_bp", __name__)
 
-# Exemplos de objetos já criados para que os GETs possam retornar dados reais.
-# Estes exemplos são criados usando os DAOs, então ficam armazenados no mesmo local de dados.
+
 example_cliente_1 = Cliente(
     nome="Maria Santos",
     telefone="11999999999",

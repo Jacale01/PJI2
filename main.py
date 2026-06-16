@@ -42,7 +42,6 @@ def exemplo_produto_e_item():
     """Exemplo 2: Produtos e Itens"""
     separador("EXEMPLO 2: PRODUTOS E ITENS")
     
-    # Criar produtos
     produto1 = Produto(
         nome="Painel Solar",
         preco=1500.00,
@@ -61,7 +60,6 @@ def exemplo_produto_e_item():
     print(f"\n2. {produto2.getNome()} - R$ {produto2.getPreco()}")
     print(f"   Descrição: {produto2.getDescricao()}")
     
-    # Criar itens (produtos com quantidade)
     item1 = Item(quantidade=2, produto=produto1)
     item2 = Item(quantidade=1, produto=produto2)
     
@@ -73,8 +71,7 @@ def exemplo_produto_e_item():
 def exemplo_troca():
     """Exemplo 3: Transação de Troca"""
     separador("EXEMPLO 3: TRANSAÇÃO DE TROCA")
-    
-    # Criar cliente
+
     cliente = Cliente(
         nome="Maria Santos",
         telefone="11988776655",
@@ -83,18 +80,15 @@ def exemplo_troca():
         cpf="98765432100",
         endereco="Rua B, 456"
     )
-    
-    # Criar produtos
+
     produto = Produto(
         nome="Bateria Solar",
         preco=3000.00,
         descricao="Bateria LiFePO4 10kWh"
     )
-    
-    # Criar itens
+
     item = Item(quantidade=1, produto=produto)
-    
-    # Criar troca
+
     troca = Troca(
         id=101,
         data="2024-06-11",
@@ -112,15 +106,13 @@ def exemplo_troca():
 def exemplo_token():
     """Exemplo 4: Tokens e Carteira"""
     separador("EXEMPLO 4: TOKENS E CARTEIRA")
-    
-    # Criar tokens
+
     tokens = []
     for i in range(1, 6):
         token = Token(id=i, dataExpedicao="2024-06-11")
         tokens.append(token)
         print(f"Token {token.getId()} - Data de Expedição: {token.getDataExpedicao()}")
-    
-    # Criar cliente e carteira
+
     cliente = Cliente(
         nome="Pedro Costa",
         telefone="11987654321",
@@ -157,7 +149,7 @@ def exemplo_energia_gerada():
     )
     
     energia = EnergiGerada(
-        quantidade=500,  # kWh
+        quantidade=500,  
         periodo="Junho/2024",
         cliente=cliente
     )
@@ -173,8 +165,7 @@ def exemplo_traducao():
     
     print("Testando a função calcularTokensGerados:")
     print("\nCálculo: tokens = int(energia * 0.1)\n")
-    
-    # Testes com diferentes quantidades de energia
+
     energias = [10, 50, 100, 255, 1000]
     
     for energia in energias:
@@ -252,7 +243,6 @@ def exemplo_completo():
     
     print("Simulando um fluxo completo:\n")
     
-    # 1. Criar cliente
     print("1️⃣ Criando cliente...")
     cliente = Cliente(
         nome="Carlos Oliveira",
@@ -263,8 +253,7 @@ def exemplo_completo():
         endereco="Rua E, 202"
     )
     print(f"   Cliente criado: {cliente.getNome()}\n")
-    
-    # 2. Registrar energia gerada
+
     print("2️⃣ Registrando energia gerada...")
     energia_gerada = 750  # kWh
     energia = EnergiGerada(
@@ -273,14 +262,12 @@ def exemplo_completo():
         cliente=cliente
     )
     print(f"   Energia registrada: {energia.getQuantidade()} kWh no período {energia.getPeriodo()}\n")
-    
-    # 3. Calcular tokens gerados
+
     print("3️⃣ Calculando tokens a gerar...")
     traducao = Traducao(energiaGerada=energia_gerada, id=1)
     tokens_quantidade = traducao.calcularTokensGerados()
     print(f"   Tokens gerados: {tokens_quantidade}\n")
-    
-    # 4. Criar carteira com tokens usando o controlador
+
     print("4️⃣ Criando carteira com tokens...")
     carteira = Carteira(
         codigo="CART_CARLOS_001",
@@ -297,12 +284,11 @@ def exemplo_completo():
     carteira = resultado_tokens['carteira']
     tokens_quantidade = resultado_tokens['tokens_quantidade']
     print(f"   Carteira criada com {carteira.totalTokens()} tokens\n")
-    
-    # 5. Usar tokens para comprar produtos
+
     print("5️⃣ Cliente usa tokens para comprar produtos...")
     produto_disponivel = Produto(
         nome="Placa Solar Premium",
-        preco=75.00,  # 75 reais = 1 token
+        preco=75.00, 
         descricao="Placa de alta eficiência"
     )
     
@@ -320,8 +306,7 @@ def exemplo_completo():
     print(f"   Quantidade: {quantidade_comprada}")
     print(f"   Valor por unidade: R$ {item.getProduto().getPreco()}")
     print(f"   Valor total da compra: R$ {troca.getValorTotal()}\n")
-    
-    # 6. Resumo final
+  
     print("6️⃣ Resumo da operação:")
     print(f"   - Cliente: {cliente.getNome()}")
     print(f"   - Carteira: {carteira.getCodigo()}")
