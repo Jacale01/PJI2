@@ -1,8 +1,3 @@
-"""
-Main - Exemplos práticos de todas as classes do projeto
-Demonstra a funcionalidade de todas as classes com exemplos reais
-"""
-
 from model.Cliente import Cliente
 from model.Carteira import Carteira
 from model.Token import Token
@@ -10,7 +5,7 @@ from model.Produto import Produto
 from model.Item import Item
 from model.Troca import Troca
 from model.EnergiaGerada import EnergiGerada
-from dao.Traducao import Traducao
+from model.Traducao import Traducao
 from Controller.ControleTraducao import gerarTokens
 from Controller.ControleTroca import calcular_valor_total, calcular_tokens_necessarios, realizar_troca
 

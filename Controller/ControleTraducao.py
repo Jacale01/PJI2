@@ -1,4 +1,4 @@
-from dao.Traducao import Traducao
+from model.Traducao import Traducao
 from model.Token import Token
 from model.Carteira import Carteira
 from datetime import datetime

@@ -5,12 +5,12 @@ from model.Carteira import Carteira
 
 
 def calcular_valor_total(itens):
-    """Calcula o valor total de uma lista de itens."""
+
     return sum(item.getSubValor() for item in itens)
 
 
 def calcular_tokens_necessarios(itens, valor_por_token=1):
-    """Calcula quantos tokens são necessários para pagar os itens."""
+
     if valor_por_token <= 0:
         raise ValueError("valor_por_token deve ser maior que zero")
     total = calcular_valor_total(itens)
@@ -18,7 +18,7 @@ def calcular_tokens_necessarios(itens, valor_por_token=1):
 
 
 def remover_tokens_da_carteira(carteira, quantidade):
-    """Remove uma quantidade de tokens da carteira, se disponível."""
+
     if quantidade > len(carteira.tokens):
         raise ValueError("Tokens insuficientes na carteira")
     del carteira.tokens[:quantidade]
@@ -26,7 +26,7 @@ def remover_tokens_da_carteira(carteira, quantidade):
 
 
 def realizar_troca(carteira, itens, data, id_troca, valor_por_token=1):
-    """Realiza a troca de tokens por itens compostos por produtos."""
+
     if not isinstance(carteira, Carteira):
         raise TypeError("carteira deve ser um objeto Carteira")
     if not isinstance(itens, list) or not itens:
