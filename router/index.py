@@ -1,128 +1,85 @@
-from flask import Blueprint, request, jsonify, abort
 from datetime import datetime
-from model.Produto import Produto
+
+from flask import Blueprint, abort, jsonify, request
+
 from model.Cliente import Cliente
 from model.Item import Item
-from dao.Traducao import create as dao_create_traducao, list_all as dao_list_traducoes, find_by_id as dao_find_traducao, update as dao_update_traducao, delete as dao_delete_traducao
-from dao.Troca import create as dao_create_troca, list_all as dao_list_trocas, find_by_id as dao_find_troca, update as dao_update_troca, delete as dao_delete_troca
+from model.Produto import Produto
+from services.traducao_service import (
+    create_traducao as service_create_traducao,
+    delete_traducao as service_delete_traducao,
+    get_traducao as service_get_traducao,
+    list_traducoes as service_list_traducoes,
+    update_traducao as service_update_traducao,
+)
+from services.troca_service import (
+    create_troca as service_create_troca,
+    delete_troca as service_delete_troca,
+    get_troca as service_get_troca,
+    list_trocas as service_list_trocas,
+    update_troca as service_update_troca,
+)
 
 traducao_bp = Blueprint("traducao_bp", __name__)
 troca_bp = Blueprint("troca_bp", __name__)
 
 
-example_cliente_1 = Cliente(
-    nome="Maria Santos",
-    telefone="11999999999",
-    email="maria@example.com",
-    id=1,
-    cpf="12345678900",
-    endereco="Rua A, 100",
-)
-example_produto_1 = Produto(
-    nome="Painel Solar",
-    preco=1500.0,
-    descricao="Painel solar 400W",
-)
-example_item_1 = Item(quantidade=2, produto=example_produto_1)
-
-example_cliente_2 = Cliente(
-    nome="João Silva",
-    telefone="11988887777",
-    email="joao@example.com",
-    id=2,
-    cpf="98765432100",
-    endereco="Rua B, 200",
-)
-example_produto_2 = Produto(
-    nome="Inversor Solar",
-    preco=2500.0,
-    descricao="Inversor 5kW",
-)
-example_item_2 = Item(quantidade=1, produto=example_produto_2)
-
-example_traducoes = [
-    dao_create_traducao(120.0),
-    dao_create_traducao(45.0),
-]
-example_trocas = [
-    dao_create_troca(cliente=example_cliente_1, itens=[example_item_1], data=datetime.now().strftime("%Y-%m-%d")),
-    dao_create_troca(cliente=example_cliente_2, itens=[example_item_2], data=datetime.now().strftime("%Y-%m-%d")),
-]
-
-
-def build_cliente(data):
-    if not isinstance(data, dict):
-        abort(400, description="cliente deve ser um objeto JSON")
-    required = ["nome", "telefone", "email", "id", "cpf", "endereco"]
-    for field in required:
-        if field not in data:
-            abort(400, description=f"campo '{field}' é obrigatório em cliente")
-    return Cliente(
-        nome=data["nome"],
-        telefone=data["telefone"],
-        email=data["email"],
-        id=data["id"],
-        cpf=data["cpf"],
-        endereco=data["endereco"],
-    )
-
-
-def build_produto(data):
-    if not isinstance(data, dict):
-        abort(400, description="produto deve ser um objeto JSON")
-    for field in ["nome", "preco", "descricao"]:
-        if field not in data:
-            abort(400, description=f"campo '{field}' é obrigatório em produto")
-    return Produto(
-        nome=data["nome"],
-        preco=float(data["preco"]),
-        descricao=data["descricao"],
-    )
-
-
-def build_item(data):
-    if not isinstance(data, dict):
-        abort(400, description="item deve ser um objeto JSON")
-    if "quantidade" not in data or "produto" not in data:
-        abort(400, description="item deve conter 'quantidade' e 'produto'")
-    produto = build_produto(data["produto"])
-    quantidade = int(data["quantidade"])
-    return Item(quantidade=quantidade, produto=produto)
-
-
 def traducao_to_dict(traducao):
+    if traducao is None:
+        return None
+    if isinstance(traducao, dict):
+        return {
+            "id": traducao.get("id"),
+            "energiaGerada": traducao.get("energiaGerada"),
+        }
     return {
-        "id": traducao.getId(),
-        "energiaGerada": traducao.getEnergiaGerada(),
-        "tokensGerados": traducao.calcularTokensGerados(),
+        "id": getattr(traducao, "id", None),
+        "energiaGerada": getattr(traducao, "energiaGerada", None),
+        "tokensGerados": getattr(traducao, "tokensGerados", None),
     }
 
 
+def build_cliente(data):
+    if data is None:
+        return None
+    return Cliente(
+        nome=data.get("nome", ""),
+        telefone=data.get("telefone", ""),
+        email=data.get("email", ""),
+        id=data.get("id"),
+        cpf=data.get("cpf", ""),
+        endereco=data.get("endereco", ""),
+    )
+
+
+def build_item(item_data):
+    produto_data = item_data.get("produto", {})
+    produto = Produto(
+        nome=produto_data.get("nome", ""),
+        preco=float(produto_data.get("preco", 0)),
+        descricao=produto_data.get("descricao", ""),
+    )
+    return Item(
+        quantidade=int(item_data.get("quantidade", 0)),
+        produto=produto,
+    )
+
+
 def troca_to_dict(troca):
+    if troca is None:
+        return None
+    if isinstance(troca, dict):
+        return {
+            "id": troca.get("id"),
+            "data": troca.get("data"),
+            "cliente": troca.get("cliente"),
+            "itens": troca.get("itens", []),
+        }
     return {
-        "id": troca.getId(),
-        "data": troca.getData(),
-        "cliente": {
-            "id": troca.getCliente().getId(),
-            "nome": troca.getCliente().getNome(),
-            "telefone": troca.getCliente().getTelefone(),
-            "email": troca.getCliente().getEmail(),
-            "cpf": troca.getCliente().getCpf(),
-            "endereco": troca.getCliente().getEndereco(),
-        },
-        "itens": [
-            {
-                "quantidade": item.getQuantidade(),
-                "produto": {
-                    "nome": item.getProduto().getNome(),
-                    "descricao": item.getProduto().getDescricao(),
-                    "preco": item.getProduto().getPreco(),
-                },
-                "subValor": item.getSubValor(),
-            }
-            for item in troca.getItem()
-        ],
-        "valorTotal": troca.getValorTotal(),
+        "id": getattr(troca, "id", None),
+        "data": getattr(troca, "data", None),
+        "cliente": getattr(troca, "cliente", None),
+        "itens": getattr(troca, "itens", []),
     }
 
 
@@ -132,19 +89,21 @@ def criar_traducao():
     if data is None or "energiaGerada" not in data:
         abort(400, description="campo 'energiaGerada' é obrigatório")
 
-    energia = float(data["energiaGerada"])
-    traducao = dao_create_traducao(energia)
+    try:
+        traducao = service_create_traducao(data["energiaGerada"])
+    except ValueError as exc:
+        abort(400, description=str(exc))
     return jsonify(traducao_to_dict(traducao)), 201
 
 
 @traducao_bp.route("/traducao", methods=["GET"])
 def listar_traducoes():
-    return jsonify([traducao_to_dict(t) for t in dao_list_traducoes()]), 200
+    return jsonify([traducao_to_dict(t) for t in service_list_traducoes()]), 200
 
 
 @traducao_bp.route("/traducao/<int:traducao_id>", methods=["GET"])
 def obter_traducao(traducao_id):
-    traducao = dao_find_traducao(traducao_id)
+    traducao = service_get_traducao(traducao_id)
     if traducao is None:
         abort(404, description="Tradução não encontrada")
     return jsonify(traducao_to_dict(traducao)), 200
@@ -156,7 +115,10 @@ def atualizar_traducao(traducao_id):
     if data is None or "energiaGerada" not in data:
         abort(400, description="campo 'energiaGerada' é obrigatório")
 
-    traducao = dao_update_traducao(traducao_id, float(data["energiaGerada"]))
+    try:
+        traducao = service_update_traducao(traducao_id, data["energiaGerada"])
+    except ValueError as exc:
+        abort(400, description=str(exc))
     if traducao is None:
         abort(404, description="Tradução não encontrada")
     return jsonify(traducao_to_dict(traducao)), 200
@@ -164,7 +126,7 @@ def atualizar_traducao(traducao_id):
 
 @traducao_bp.route("/traducao/<int:traducao_id>", methods=["DELETE"])
 def deletar_traducao(traducao_id):
-    deleted = dao_delete_traducao(traducao_id)
+    deleted = service_delete_traducao(traducao_id)
     if not deleted:
         abort(404, description="Tradução não encontrada")
     return jsonify({"mensagem": "Tradução removida com sucesso"}), 200
@@ -182,18 +144,21 @@ def criar_troca():
     itens = [build_item(item_data) for item_data in data["itens"]]
     data_troca = data.get("data", datetime.now().strftime("%Y-%m-%d"))
 
-    troca = dao_create_troca(cliente=cliente, itens=itens, data=data_troca)
+    try:
+        troca = service_create_troca(cliente=data["cliente"], itens=data["itens"], data=data_troca)
+    except ValueError as exc:
+        abort(400, description=str(exc))
     return jsonify(troca_to_dict(troca)), 201
 
 
 @troca_bp.route("/troca", methods=["GET"])
 def listar_trocas():
-    return jsonify([troca_to_dict(t) for t in dao_list_trocas()]), 200
+    return jsonify([troca_to_dict(t) for t in service_list_trocas()]), 200
 
 
 @troca_bp.route("/troca/<int:troca_id>", methods=["GET"])
 def obter_troca(troca_id):
-    troca = dao_find_troca(troca_id)
+    troca = service_get_troca(troca_id)
     if troca is None:
         abort(404, description="Troca não encontrada")
     return jsonify(troca_to_dict(troca)), 200
@@ -205,11 +170,11 @@ def atualizar_troca(troca_id):
     if data is None:
         abort(400, description="JSON inválido")
 
-    cliente = build_cliente(data["cliente"]) if "cliente" in data else None
-    itens = [build_item(item_data) for item_data in data["itens"]] if "itens" in data else None
-    data_troca = data.get("data") if "data" in data else None
+    cliente = data.get("cliente")
+    itens = data.get("itens")
+    data_troca = data.get("data")
 
-    troca = dao_update_troca(troca_id, cliente=cliente, itens=itens, data=data_troca)
+    troca = service_update_troca(troca_id, cliente=cliente, itens=itens, data=data_troca)
     if troca is None:
         abort(404, description="Troca não encontrada")
     return jsonify(troca_to_dict(troca)), 200
@@ -217,7 +182,8 @@ def atualizar_troca(troca_id):
 
 @troca_bp.route("/troca/<int:troca_id>", methods=["DELETE"])
 def deletar_troca(troca_id):
-    deleted = dao_delete_troca(troca_id)
+    deleted = service_delete_troca(troca_id)
     if not deleted:
         abort(404, description="Troca não encontrada")
     return jsonify({"mensagem": "Troca removida com sucesso"}), 200
+
